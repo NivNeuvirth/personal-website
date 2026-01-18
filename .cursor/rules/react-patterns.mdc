@@ -8,19 +8,19 @@ globs:
 
 ## Transport/Client Instances
 
-**Problem**: Creating transport instances inside component bodies causes re-initialization on every render.
+**Problem**: Creating transport instances inside component bodies causes a new transport to be passed into hooks on every render, which can reinitialize their internal state (not just impact performance).
 
-**Solution**: Create instances outside the component or use `useMemo` for expensive objects.
+**Solution**: Create instances outside the component or use `useMemo` so hooks receive a stable transport reference.
 
 ```tsx
-// ❌ Bad - creates new instance on every render
+// ❌ Bad - creates a new transport instance on every render, causing the hook to see a new dependency and potentially reinitialize its internal state
 export function Chat() {
   const { messages } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
 }
 
-// ✅ Good - instance created once
+// ✅ Good - instance created once and reused, so the hook sees a stable transport
 const chatTransport = new DefaultChatTransport({ api: "/api/chat" });
 
 export function Chat() {
